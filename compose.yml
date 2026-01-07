@@ -1,0 +1,80 @@
+services:
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Zurich
+    volumes:
+      - ./config/prowlarr:/config
+    ports:
+      - "9696:9696"
+    restart: unless-stopped
+
+  sabnzbd:
+    image: lscr.io/linuxserver/sabnzbd:latest
+    container_name: sabnzbd
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Zurich
+    volumes:
+      - ./config/sabnzbd:/config
+      - ./data/downloads:/downloads
+      - ./data/incomplete:/incomplete-downloads
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Zurich
+    volumes:
+      - ./config/radarr:/config
+      - /mnt/nas-media/movies:/movies
+      - /mnt/nas-media/anime/movies:/anime-movies
+      - ./data/downloads:/downloads
+    ports:
+      - "7878:7878"
+    restart: unless-stopped
+    depends_on:
+      - sabnzbd
+      - prowlarr
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Zurich
+    volumes:
+      - ./config/sonarr:/config
+      - /mnt/nas-media/series:/tv
+      - /mnt/nas-media/anime/tv:/anime-tv
+      - ./data/downloads:/downloads
+    ports:
+      - "8989:8989"
+    restart: unless-stopped
+    depends_on:
+      - sabnzbd
+      - prowlarr
+
+  jellyseerr:
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    environment:
+      - TZ=Europe/Zurich
+    volumes:
+      - ./config/jellyseerr:/app/config
+    ports:
+      - "5055:5055"
+    restart: unless-stopped
+    depends_on:
+      - radarr
+      - sonarr
