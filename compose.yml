@@ -1,4 +1,27 @@
 services:
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    network_mode: "host"
+    volumes:
+      - ./config:/config
+      - ./cache:/cache
+      - /mnt/nas-media:/media
+    restart: always
+
+  # scraper:
+  #   image: ghcr.io/rikoxcode/aniworld-downloader-deprecated:latest
+  #   container_name: aniworld-scraper
+  #   ports:
+  #     - "8080:8080"
+  #   volumes:
+  #     - ./scraper-data:/app/data
+  #     - /mnt/nas-media/series:/app/downloads
+  #     - /mnt/nas-media/movies:/app/movies
+  #   restart: always
+  #   stdin_open: true
+  #   tty: true
+
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
@@ -21,8 +44,7 @@ services:
       - TZ=Europe/Zurich
     volumes:
       - ./config/sabnzbd:/config
-      - ./data/downloads:/downloads
-      - ./data/incomplete:/incomplete-downloads
+      - /mnt/nas-media:/data # NAS Media-Root als /data mounten
     ports:
       - "8080:8080"
     restart: unless-stopped
@@ -36,16 +58,14 @@ services:
       - TZ=Europe/Zurich
     volumes:
       - ./config/radarr:/config
-      - /mnt/nas-media/movies:/movies
-      - /mnt/nas-media/anime/movies:/anime-movies
-      - ./data/downloads:/downloads
+      - /mnt/nas-media:/data  # Gesamtes Media-Verzeichnis
     ports:
       - "7878:7878"
     restart: unless-stopped
     depends_on:
       - sabnzbd
       - prowlarr
-
+      
   sonarr:
     image: lscr.io/linuxserver/sonarr:latest
     container_name: sonarr
@@ -55,9 +75,7 @@ services:
       - TZ=Europe/Zurich
     volumes:
       - ./config/sonarr:/config
-      - /mnt/nas-media/series:/tv
-      - /mnt/nas-media/anime/tv:/anime-tv
-      - ./data/downloads:/downloads
+      - /mnt/nas-media:/data  # Gesamtes Media-Verzeichnis
     ports:
       - "8989:8989"
     restart: unless-stopped
@@ -68,6 +86,7 @@ services:
   jellyseerr:
     image: fallenbagel/jellyseerr:latest
     container_name: jellyseerr
+    network_mode: "host"
     environment:
       - TZ=Europe/Zurich
     volumes:
