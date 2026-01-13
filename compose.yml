@@ -86,7 +86,7 @@ services:
   jellyseerr:
     image: fallenbagel/jellyseerr:latest
     container_name: jellyseerr
-    network_mode: "host"
+    # network_mode: "host"
     environment:
       - TZ=Europe/Zurich
     volumes:
