@@ -1,27 +1,4 @@
 services:
-  jellyfin:
-    image: jellyfin/jellyfin:latest
-    container_name: jellyfin
-    network_mode: "host"
-    volumes:
-      - ./config:/config
-      - ./cache:/cache
-      - /mnt/nas-media:/media
-    restart: always
-
-  # scraper:
-  #   image: ghcr.io/rikoxcode/aniworld-downloader-deprecated:latest
-  #   container_name: aniworld-scraper
-  #   ports:
-  #     - "8080:8080"
-  #   volumes:
-  #     - ./scraper-data:/app/data
-  #     - /mnt/nas-media/series:/app/downloads
-  #     - /mnt/nas-media/movies:/app/movies
-  #   restart: always
-  #   stdin_open: true
-  #   tty: true
-
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
@@ -44,7 +21,7 @@ services:
       - TZ=Europe/Zurich
     volumes:
       - ./config/sabnzbd:/config
-      - /mnt/nas-media:/data # NAS Media-Root als /data mounten
+      - /mnt/media:/data # NAS Media-Root als /data mounten
     ports:
       - "8080:8080"
     restart: unless-stopped
@@ -58,7 +35,7 @@ services:
       - TZ=Europe/Zurich
     volumes:
       - ./config/radarr:/config
-      - /mnt/nas-media:/data  # Gesamtes Media-Verzeichnis
+      - /mnt/media:/data  # Gesamtes Media-Verzeichnis
     ports:
       - "7878:7878"
     restart: unless-stopped
@@ -75,7 +52,7 @@ services:
       - TZ=Europe/Zurich
     volumes:
       - ./config/sonarr:/config
-      - /mnt/nas-media:/data  # Gesamtes Media-Verzeichnis
+      - /mnt/media:/data  # Gesamtes Media-Verzeichnis
     ports:
       - "8989:8989"
     restart: unless-stopped
@@ -83,11 +60,14 @@ services:
       - sabnzbd
       - prowlarr
 
-  jellyseerr:
-    image: fallenbagel/jellyseerr:latest
-    container_name: jellyseerr
+  seerr:
+    image: ghcr.io/seerr-team/seerr:latest
+    init: true
+    container_name: seerr
     # network_mode: "host"
     environment:
+      - PUID=1000
+      - PGID=1000
       - TZ=Europe/Zurich
     volumes:
       - ./config/jellyseerr:/app/config
